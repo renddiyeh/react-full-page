@@ -10,6 +10,7 @@ export default function FullPageExample() {
       transform: 'translateX(-50%)',
     },
   };
+
   return (
     <FullPage controls controlsProps={controlsProps}>
       <Slide
@@ -24,7 +25,9 @@ export default function FullPageExample() {
             background: '#0074D9', display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}
       >
-        <h1>2</h1>
+        <div style={{ height: '150vh' }}>
+          <h1>2</h1>
+        </div>
       </Slide>
       <Slide
         style={{
@@ -35,10 +38,15 @@ export default function FullPageExample() {
       </Slide>
       <Slide
         style={{
-            background: '#d52685', display: 'flex', alignItems: 'center', justifyContent: 'center',
+            background: '#d52685',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
           }}
       >
-        <h1>4</h1>
+        <div style={{ height: '150vh' }}>
+          <h1>4</h1>
+        </div>
       </Slide>
     </FullPage>
   );

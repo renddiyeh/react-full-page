@@ -81,6 +81,7 @@ export default class FullPage extends React.Component {
     for (let i = 0; i < this._slidesCount; i++) {
       this._slides.push(window.innerHeight * i);
     }
+    this.checkChildrenOverflow();
 
     this.setState({
       height: window.innerHeight,
@@ -93,39 +94,72 @@ export default class FullPage extends React.Component {
   }
 
   onTouchMove = (evt) => {
-    evt.preventDefault();
     const touchEnd = evt.changedTouches[0].clientY;
-
     if (!this._isScrollPending && !this._isScrolledAlready) {
       if (this._touchStart > touchEnd + this._touchSensitivity) {
-        this.scrollToSlide(this.state.activeSlide + 1);
+        if (this.checkOverflowScrolling(true, evt.target)) {
+          evt.preventDefault();
+          this.scrollToSlide(this.state.activeSlide + 1);
+        }
       } else if (this._touchStart < touchEnd - this._touchSensitivity) {
-        this.scrollToSlide(this.state.activeSlide - 1);
+        if (this.checkOverflowScrolling(false, evt.target)) {
+          evt.preventDefault();
+          this.scrollToSlide(this.state.activeSlide - 1);
+        }
       }
     }
   }
 
   onScroll = (evt) => {
-    evt.preventDefault();
-    if (this._isScrollPending) {
-      return;
-    }
-
     const scrollDown = (evt.wheelDelta || -evt.deltaY || -evt.detail) < 0;
-    let { activeSlide } = this.state;
+    if (this.checkOverflowScrolling(scrollDown, evt.target)) {
+      evt.preventDefault();
 
-    if (scrollDown) {
-      activeSlide++;
-    } else {
-      activeSlide--;
+      if (this._isScrollPending) {
+        return;
+      }
+
+      let { activeSlide } = this.state;
+
+      if (scrollDown) {
+        activeSlide++;
+      } else {
+        activeSlide--;
+      }
+
+      this.scrollToSlide(activeSlide);
     }
-
-    this.scrollToSlide(activeSlide);
   }
 
   getSlidesCount = () => this._slidesCount
 
   getCurrentSlideIndex = () => this.state.activeSlide
+
+  checkChildrenOverflow = () => {
+    this.chidrenOverflow = [];
+    this.chidrenRef = [];
+    this._container.childNodes.forEach((slide, index) => {
+      if (index > 0) {
+        this.chidrenRef.push(slide);
+        this.chidrenOverflow.push(slide.clientHeight - window.innerHeight);
+        // eslint-disable-next-line no-param-reassign
+        if (slide.clientHeight > window.innerHeight) slide.style.touchAction = 'pan-y';
+      }
+    });
+  }
+
+  checkOverflowScrolling = (scrollDown, target) => {
+    const overflow = this.chidrenOverflow[this.state.activeSlide];
+    const slide = this.chidrenRef[this.state.activeSlide];
+    if (overflow > 0 && target === slide) {
+      return scrollDown ? slide.scrollTop >= overflow / 2 : slide.scrollTop <= 0;
+    }
+    return true;
+  }
+
+  handleRef = (ref) => {
+    this._container = ref;
+  }
 
   scrollNext = () => {
     this.scrollToSlide(this.state.activeSlide + 1);
@@ -186,7 +220,7 @@ export default class FullPage extends React.Component {
 
   render() {
     return (
-      <div style={{ height: this.state.height }}>
+      <div style={{ height: this.state.height }} ref={this.handleRef}>
         {this.renderControls()}
         {this.props.children}
       </div>
