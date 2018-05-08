@@ -142,8 +142,12 @@ export default class FullPage extends React.Component {
       if (index > 0) {
         this.chidrenRef.push(slide);
         this.chidrenOverflow.push(slide.clientHeight - window.innerHeight);
-        // eslint-disable-next-line no-param-reassign
-        if (slide.clientHeight > window.innerHeight) slide.style.touchAction = 'pan-y';
+        /* eslint-disable no-param-reassign */
+        if (slide.clientHeight > window.innerHeight) {
+          slide.style.touchAction = 'pan-y';
+          slide.style.overflowY = 'scroll';
+        }
+        /* eslint-enable no-param-reassign */
       }
     });
   }
